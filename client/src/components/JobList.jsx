@@ -7,13 +7,14 @@ function JobList({
 })  {
   return (
     <>
-      {jobs.map(job => (
-        <JobCard
-          job={job}
-          onDelete={onDelete}
-          onEdit={onEdit}
-        />
-      ))}
+      {jobs.map((job) => (
+  <JobCard
+    key={job._id}
+    job={job}
+    onDelete={onDelete}
+    onEdit={onEdit}
+  />
+))}
     </>
   );
 }

@@ -4,27 +4,25 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import jobRoutes from "./routes/jobRoutes.js";
 
-
 dotenv.config();
-
-connectDB();
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-  })
-);
+// Connect to MongoDB
+connectDB();
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
+// Routes
 app.use("/api/jobs", jobRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Job Tracker API Running");
+  res.send("Job Tracker API Running 🚀");
 });
 
+// Start Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

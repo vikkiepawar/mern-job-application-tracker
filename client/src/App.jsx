@@ -20,9 +20,11 @@ function App() {
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+
   const [editing, setEditing] = useState(false);
   const [editId, setEditId] = useState(null);
 
+  // Fetch all jobs
   const fetchJobs = async () => {
     try {
       const res = await API.get("/jobs");
@@ -40,6 +42,7 @@ function App() {
     loadJobs();
   }, []);
 
+  // Handle input changes
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -47,35 +50,30 @@ function App() {
     });
   };
 
+  // Add or Update Job
   const addJob = async () => {
-  try {
+    try {
+      if (editing) {
+        await API.put(`/jobs/${editId}`, form);
+        setEditing(false);
+        setEditId(null);
+      } else {
+        await API.post("/jobs", form);
+      }
 
-    if (editing) {
+      setForm({
+        company: "",
+        role: "",
+        status: "Applied",
+      });
 
-      await API.put(`/jobs/${editId}`, form);
-
-      setEditing(false);
-      setEditId(null);
-
-    } else {
-
-      await API.post("/jobs", form);
-
+      fetchJobs();
+    } catch (err) {
+      console.error(err);
     }
-
-    setForm({
-      company: "",
-      role: "",
-      status: "Applied",
-    });
-
-    fetchJobs();
-
-  } catch (err) {
-    console.log(err);
-  }
   };
 
+  // Delete Job
   const deleteJob = async (id) => {
     try {
       await API.delete(`/jobs/${id}`);
@@ -85,6 +83,19 @@ function App() {
     }
   };
 
+  // Edit Job
+  const editJob = (job) => {
+    setForm({
+      company: job.company,
+      role: job.role,
+      status: job.status,
+    });
+
+    setEditId(job._id);
+    setEditing(true);
+  };
+
+  // Search + Filter
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch = job.company
       .toLowerCase()
@@ -95,34 +106,20 @@ function App() {
 
     return matchesSearch && matchesFilter;
   });
-  const editJob = (job) => {
-
-  setForm({
-    company: job.company,
-    role: job.role,
-    status: job.status,
-  });
-
-  setEditId(job._id);
-
-  setEditing(true);
-
-};
 
   return (
     <>
       <Navbar />
 
       <div className="container">
-
         <Dashboard jobs={jobs} />
 
         <JobForm
-    form={form}
-    handleChange={handleChange}
-    addJob={addJob}
-    editing={editing}
-/>i
+          form={form}
+          handleChange={handleChange}
+          addJob={addJob}
+          editing={editing}
+        />
 
         <FilterBar
           search={search}
@@ -132,11 +129,10 @@ function App() {
         />
 
         <JobList
-    jobs={filteredJobs}
-    onDelete={deleteJob}
-    onEdit={editJob}
-/>
-
+          jobs={filteredJobs}
+          onDelete={deleteJob}
+          onEdit={editJob}
+        />
       </div>
     </>
   );
